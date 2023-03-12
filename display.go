@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -16,8 +17,8 @@ func newDisplay() Display {
 	d := Display{
 		suitNames:      [4]string{"Club", "Diamond", "Heart", "Spade"},
 		suitNamesShort: [4]string{"♧", "♢", "♡", "♤"},
-		cardNames:      [13]string{"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"},
-		cardNamesShort: [13]string{"02", "03", "04", "05", "06", "07", "08", "09", "10", "JJ", "QQ", "KK", "AA"},
+		cardNames:      [13]string{"Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"},
+		cardNamesShort: [13]string{"AA", "02", "03", "04", "05", "06", "07", "08", "09", "10", "JJ", "QQ", "KK"},
 	}
 	return d
 }
@@ -26,10 +27,18 @@ func (d Display) deck(deck Deck) string {
 	return d.cards(deck.cards)
 }
 func (d Display) cardLong(c Card) string {
-	return d.cardNames[c.value] + " " + d.suitNames[c.suit]
+	if c.value < 0 && c.suit < 0 {
+		return "NULL"
+	} else {
+		return d.cardNames[c.value] + " " + d.suitNames[c.suit]
+	}
 }
 func (d Display) card(c Card) string {
-	return d.cardNamesShort[c.value] + d.suitNamesShort[c.suit]
+	if c.value < 0 && c.suit < 0 {
+		return "NULL"
+	} else {
+		return d.cardNamesShort[c.value] + d.suitNamesShort[c.suit]
+	}
 }
 
 func (d Display) cards(cards []Card) string {
@@ -49,4 +58,14 @@ func (d Display) suitsBorder() string {
 		}
 	}
 	return strings.Join(s, "")
+}
+
+func (d Display) move(sp SolitaireMove) string {
+	var s []string
+	s = append(s, d.card(sp.card))
+	s = append(s, "->")
+	s = append(s, d.card(sp.ontoCard))
+	s = append(s, sp.deckType)
+	s = append(s, strconv.Itoa(sp.deckIdx))
+	return strings.Join(s, " ")
 }

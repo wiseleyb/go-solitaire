@@ -11,3 +11,7 @@ func newSolitaireTableauPile() SolitaireTableauPile {
 	stp.shownDeck = newDeck()
 	return stp
 }
+
+func (stp SolitaireTableauPile) shownCard() Card {
+	return stp.shownDeck.last()
+}

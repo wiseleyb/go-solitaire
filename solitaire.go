@@ -19,11 +19,31 @@ func newSolitaire() Solitaire {
 	return sol
 }
 
+func (sol *Solitaire) play() {
+	sp := newSolitairePlay(sol)
+	sp.play()
+}
+
+func (sol Solitaire) stockCard() Card {
+	return sol.stock.cards[sol.stockIdx]
+}
+
+// returns a foundation deck for a given suit
+func (sol Solitaire) foundationDeckBySuit(suit int) Deck {
+	for fdIdx := range sol.foundations {
+		if sol.foundations[fdIdx].suit == suit {
+			return sol.foundations[fdIdx].deck
+		}
+	}
+	// TODO: how to return nil/error
+	return newDeck()
+}
+
 func (sol *Solitaire) restart() {
 	sol.stock = new52DeckShuffled()
 	sol.suits = [4]string{"Club", "Diamond", "Heart", "Space"}
 	for suitIdx := range sol.suits {
-		sol.foundations[suitIdx] = newSolitaireFoundationsPile(sol.suits[suitIdx])
+		sol.foundations[suitIdx] = newSolitaireFoundationsPile(suitIdx)
 	}
 	sol.moves = 0
 	fmt.Println("stock", sol.stock)
@@ -37,7 +57,7 @@ func (sol *Solitaire) restart() {
 	}
 }
 
-func (sol Solitaire) display() {
+func (sol *Solitaire) display() {
 	disp := newDisplay()
 	fmt.Println("")
 	fmt.Println("")
@@ -64,4 +84,22 @@ func (sol Solitaire) display() {
 
 	fmt.Println("")
 	fmt.Println("Stock", disp.card(sol.stock.cards[sol.stockIdx]), "Stock Deck", disp.deck(sol.stock))
+
+	fmt.Println("")
+	sp := newSolitairePlay(sol)
+	pcs := sp.playableCards()
+	fmt.Println("Playable Cards", disp.cards(pcs))
+
+	fmt.Println("")
+	for cardIdx := range pcs {
+		card := pcs[cardIdx]
+		fmt.Println(disp.card(card))
+		moves := sp.playCard(card)
+		for moveIdx := range moves {
+			fmt.Println("   ", disp.move(moves[moveIdx]))
+		}
+	}
+
+	fmt.Println("")
+	fmt.Println("")
 }

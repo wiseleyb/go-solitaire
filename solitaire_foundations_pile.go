@@ -2,10 +2,10 @@ package main
 
 type SolitaireFoundationsPile struct {
 	deck Deck
-	suit string
+	suit int
 }
 
-func newSolitaireFoundationsPile(suit string) SolitaireFoundationsPile {
+func newSolitaireFoundationsPile(suit int) SolitaireFoundationsPile {
 	scp := SolitaireFoundationsPile{}
 	scp.deck = newDeck()
 	scp.suit = suit
