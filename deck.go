@@ -29,7 +29,6 @@ func new52DeckShuffled() Deck {
 }
 
 func (d *Deck) shuffle() {
-	fmt.Println("shuffle")
 	r := newRand()
 	cardLen := len(d.cards)
 	for x := 0; x < 100; x++ {
@@ -62,7 +61,7 @@ func (d *Deck) rPush(card Card) {
 // removes and returns array[0]
 func (d *Deck) lPop() Card {
 	card := d.cards[0]
-	d.cards = d.cards[1:len(d.cards)]
+	d.cards = d.cards[1:]
 	return card
 }
 
@@ -87,6 +86,11 @@ func (d *Deck) reverse() {
 	for i, j := 0, len(d.cards)-1; i < j; i, j = i+1, j-1 {
 		d.cards[i], d.cards[j] = d.cards[j], d.cards[i]
 	}
+}
+
+func (d *Deck) rotateLastToFirst() {
+	card := d.rPop()
+	d.lPush(card)
 }
 
 func testDeck() {

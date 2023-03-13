@@ -5,27 +5,57 @@ import (
 )
 
 type Solitaire struct {
-	stock       Deck
-	suits       [4]string
-	foundations [4]SolitaireFoundationsPile // aces stacks
-	stockIdx    int
-	tableaus    [7]SolitaireTableauPile
-	moves       int
+	deck          Deck
+	stock         SolitaireStock
+	suits         [4]string
+	foundations   [4]SolitaireFoundationsPile // aces stacks
+	tableaus      [7]SolitaireTableauPile
+	playableCards []SolitaireCard
+	possibleMoves []SolitaireMove
+	playedMoves   []SolitaireMove
+	moves         int
 }
 
 func newSolitaire() Solitaire {
 	sol := Solitaire{}
 	sol.restart()
+	sol.display()
 	return sol
 }
 
-func (sol *Solitaire) play() {
-	sp := newSolitairePlay(sol)
-	sp.play()
+func (sol *Solitaire) restart() {
+	sol.deck = new52DeckShuffled()
+	sol.suits = [4]string{"Club", "Diamond", "Heart", "Space"}
+	for suitIdx := range sol.suits {
+		sol.foundations[suitIdx] = newSolitaireFoundationsPile(suitIdx)
+	}
+	for tabIdx := range sol.tableaus {
+		for x := 0; x < tabIdx; x++ {
+			card := sol.deck.draw()
+			sol.tableaus[tabIdx].hiddenDeck.lPush(card)
+		}
+		card := sol.deck.draw()
+		sol.tableaus[tabIdx].shownDeck.lPush(card)
+	}
+	sol.stock = newSolitaireStock(sol.deck)
+	sol.moves = 0
+}
+
+func (sol *Solitaire) move() {
+	// play turn
+	sol.moves++
+	disp := newDisplay()
+	disp.suitsBorderP()
+	fmt.Println("")
+	fmt.Println("PLAY TURN")
+	sol.findMoves()
+	sol.displayPossibleMoves()
+	sol.playMove()
+	sol.display()
 }
 
 func (sol Solitaire) stockCard() Card {
-	return sol.stock.cards[sol.stockIdx]
+	return sol.stock.deck.last()
 }
 
 // returns a foundation deck for a given suit
@@ -39,21 +69,28 @@ func (sol Solitaire) foundationDeckBySuit(suit int) Deck {
 	return newDeck()
 }
 
-func (sol *Solitaire) restart() {
-	sol.stock = new52DeckShuffled()
-	sol.suits = [4]string{"Club", "Diamond", "Heart", "Space"}
-	for suitIdx := range sol.suits {
-		sol.foundations[suitIdx] = newSolitaireFoundationsPile(suitIdx)
-	}
-	sol.moves = 0
-	fmt.Println("stock", sol.stock)
-	for tabIdx := range sol.tableaus {
-		for x := 0; x < tabIdx; x++ {
-			card := sol.stock.draw()
-			sol.tableaus[tabIdx].hiddenDeck.lPush(card)
+// resets possibleMoves
+// populates possibleMoves given current board
+func (sol *Solitaire) findMoves() {
+	sp := newSolitairePlay(sol)
+	pcs := sp.playableCards()
+	sol.playableCards = pcs
+	sol.possibleMoves = []SolitaireMove{}
+	for cardIdx := range pcs {
+		card := pcs[cardIdx]
+		moves := sp.findMoves(card)
+		for moveIdx := range moves {
+			sol.possibleMoves = append(sol.possibleMoves, moves[moveIdx])
 		}
-		card := sol.stock.draw()
-		sol.tableaus[tabIdx].shownDeck.lPush(card)
+	}
+}
+
+// plays a possibleMove
+func (sol *Solitaire) playMove() {
+	if len(sol.possibleMoves) > 0 {
+		move := sol.possibleMoves[0]
+		move.play()
+		sol.playedMoves = append(sol.playedMoves, move)
 	}
 }
 
@@ -62,7 +99,7 @@ func (sol *Solitaire) display() {
 	fmt.Println("")
 	fmt.Println("")
 	disp.suitsBorderP()
-	fmt.Println("Solitaire Board")
+	fmt.Println("Solitaire Board", "moves", sol.moves)
 	fmt.Println("")
 	fmt.Println("Foundations")
 	for suitIdx := range sol.suits {
@@ -80,26 +117,18 @@ func (sol *Solitaire) display() {
 	}
 
 	fmt.Println("")
-	fmt.Println("Moves", sol.moves)
+	fmt.Println("Stock", disp.card(sol.stock.current()), "Stock Deck", disp.deck(sol.stock.deck))
 
 	fmt.Println("")
-	fmt.Println("Stock", disp.card(sol.stock.cards[sol.stockIdx]), "Stock Deck", disp.deck(sol.stock))
-
 	fmt.Println("")
-	sp := newSolitairePlay(sol)
-	pcs := sp.playableCards()
-	fmt.Println("Playable Cards", disp.cards(pcs))
+}
 
+func (sol *Solitaire) displayPossibleMoves() {
+	disp := newDisplay()
 	fmt.Println("")
-	for cardIdx := range pcs {
-		card := pcs[cardIdx]
-		fmt.Println(disp.card(card))
-		moves := sp.playCard(card)
-		for moveIdx := range moves {
-			fmt.Println("   ", disp.move(moves[moveIdx]))
-		}
+	fmt.Println("Playable Cards", disp.solitaire_cards(sol.playableCards))
+	for moveIdx := range sol.possibleMoves {
+		move := sol.possibleMoves[moveIdx]
+		fmt.Println(disp.move(move))
 	}
-
-	fmt.Println("")
-	fmt.Println("")
 }

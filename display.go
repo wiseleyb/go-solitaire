@@ -41,12 +41,26 @@ func (d Display) card(c Card) string {
 	}
 }
 
+func (d Display) solitaire_card(sc SolitaireCard) string {
+	return d.card(sc.card)
+}
+
 func (d Display) cards(cards []Card) string {
 	var s []string
 	for cardIdx := range cards {
 		s = append(s, d.card(cards[cardIdx]))
 	}
 	return strings.Join(s, " ")
+}
+
+func (d Display) solitaire_cards(solitaire_cards []SolitaireCard) string {
+	// TODO: There's got to be a better way to do this
+	var cards []Card
+	for scIdx := range solitaire_cards {
+		sc := solitaire_cards[scIdx]
+		cards = append(cards, sc.card)
+	}
+	return d.cards(cards)
 }
 
 func (d Display) suitsBorderP() { fmt.Println(d.suitsBorder()) }
@@ -62,10 +76,12 @@ func (d Display) suitsBorder() string {
 
 func (d Display) move(sp SolitaireMove) string {
 	var s []string
-	s = append(s, d.card(sp.card))
+	s = append(s, d.solitaire_card(sp.card))
+	s = append(s, sp.card.deckType)
+	s = append(s, strconv.Itoa(sp.card.deckIdx))
 	s = append(s, "->")
-	s = append(s, d.card(sp.ontoCard))
-	s = append(s, sp.deckType)
-	s = append(s, strconv.Itoa(sp.deckIdx))
+	s = append(s, d.solitaire_card(sp.ontoCard))
+	s = append(s, sp.ontoCard.deckType)
+	s = append(s, strconv.Itoa(sp.ontoCard.deckIdx))
 	return strings.Join(s, " ")
 }
