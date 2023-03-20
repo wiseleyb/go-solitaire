@@ -42,16 +42,8 @@ func (sol *Solitaire) restart() {
 }
 
 func (sol *Solitaire) move() {
-	// play turn
-	sol.moves++
-	disp := newDisplay()
-	disp.suitsBorderP()
-	fmt.Println("")
-	fmt.Println("PLAY TURN")
-	sol.findMoves()
-	sol.displayPossibleMoves()
-	sol.playMove()
-	sol.display()
+	sp := newSolitairePlay(sol)
+	sp.move()
 }
 
 func (sol Solitaire) stockCard() Card {
@@ -67,31 +59,6 @@ func (sol Solitaire) foundationDeckBySuit(suit int) Deck {
 	}
 	// TODO: how to return nil/error
 	return newDeck()
-}
-
-// resets possibleMoves
-// populates possibleMoves given current board
-func (sol *Solitaire) findMoves() {
-	sp := newSolitairePlay(sol)
-	pcs := sp.playableCards()
-	sol.playableCards = pcs
-	sol.possibleMoves = []SolitaireMove{}
-	for cardIdx := range pcs {
-		card := pcs[cardIdx]
-		moves := sp.findMoves(card)
-		for moveIdx := range moves {
-			sol.possibleMoves = append(sol.possibleMoves, moves[moveIdx])
-		}
-	}
-}
-
-// plays a possibleMove
-func (sol *Solitaire) playMove() {
-	if len(sol.possibleMoves) > 0 {
-		move := sol.possibleMoves[0]
-		move.play()
-		sol.playedMoves = append(sol.playedMoves, move)
-	}
 }
 
 func (sol *Solitaire) display() {
@@ -121,14 +88,4 @@ func (sol *Solitaire) display() {
 
 	fmt.Println("")
 	fmt.Println("")
-}
-
-func (sol *Solitaire) displayPossibleMoves() {
-	disp := newDisplay()
-	fmt.Println("")
-	fmt.Println("Playable Cards", disp.solitaire_cards(sol.playableCards))
-	for moveIdx := range sol.possibleMoves {
-		move := sol.possibleMoves[moveIdx]
-		fmt.Println(disp.move(move))
-	}
 }

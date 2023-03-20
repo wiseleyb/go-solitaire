@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type SolitairePlay struct {
 	sol           *Solitaire
 	possibleMoves []SolitaireMove
@@ -11,9 +13,31 @@ func newSolitairePlay(sol *Solitaire) SolitairePlay {
 	return sp
 }
 
-func (sp SolitairePlay) play() {
-	sp.sol.display()
-	sp.possibleMoves = []SolitaireMove{}
+func (sp SolitairePlay) move() {
+	// play turn
+	sp.sol.moves++
+	disp := newDisplay()
+	disp.suitsBorderP()
+	fmt.Println("")
+	fmt.Println("PLAY TURN")
+	sp.findAllMoves()
+	sp.displayPossibleMoves()
+	sp.playMove()
+}
+
+// resets possibleMoves
+// populates possibleMoves given current board
+func (sp SolitairePlay) findAllMoves() {
+	pcs := sp.playableCards()
+	sp.sol.playableCards = pcs
+	sp.sol.possibleMoves = []SolitaireMove{}
+	for cardIdx := range pcs {
+		card := pcs[cardIdx]
+		moves := sp.findMoves(card)
+		for moveIdx := range moves {
+			sp.sol.possibleMoves = append(sp.sol.possibleMoves, moves[moveIdx])
+		}
+	}
 }
 
 // finds cards that could be played
@@ -23,14 +47,16 @@ func (sp SolitairePlay) playableCards() []SolitaireCard {
 	// check stock
 	stock_size := len(sp.sol.stock.deck.cards)
 	if stock_size > 0 {
-		res = append(res, newSolitaireCard(sp.sol, sp.sol.stock.current(), "stock", -1, -1))
+    nsc := newSolitaireCard(sp.sol, sp.sol.stock.current(), "stock", -1, -1)
+		res = append(res, nsc)
 	}
 	// check foundations
 	for fIdx := range sp.sol.foundations {
 		f := sp.sol.foundations[fIdx]
 		if len(f.deck.cards) > 0 {
 			//fmt.Println("foundation", disp.card(f.deck.last()))
-			res = append(res, newSolitaireCard(sp.sol, f.deck.last(), "foundation", fIdx, -1))
+      nsc := newSolitaireCard(sp.sol, f.deck.last(), "foundation", fIdx, -1)
+			res = append(res, nsc)
 		}
 	}
 	// check tableaus
@@ -38,7 +64,8 @@ func (sp SolitairePlay) playableCards() []SolitaireCard {
 		tab := sp.sol.tableaus[tabIdx]
 		for cardIdx := range tab.shownDeck.cards {
 			card := tab.shownDeck.cards[cardIdx]
-			res = append(res, newSolitaireCard(sp.sol, card, "tableau", tabIdx, cardIdx))
+      nsc := newSolitaireCard(sp.sol, card, "tableau", tabIdx, cardIdx)
+			res = append(res, nsc)
 		}
 	}
 	return res
@@ -82,4 +109,23 @@ func (sp SolitairePlay) findMoves(sc SolitaireCard) []SolitaireMove {
 		}
 	}
 	return res
+}
+
+// plays a possibleMove
+func (sp SolitairePlay) playMove() {
+	if len(sp.sol.possibleMoves) > 0 {
+		move := sp.sol.possibleMoves[0]
+		move.play()
+		sp.sol.playedMoves = append(sp.sol.playedMoves, move)
+	}
+}
+
+func (sp SolitairePlay) displayPossibleMoves() {
+	disp := newDisplay()
+	fmt.Println("")
+	fmt.Println("Playable Cards", disp.solitaire_cards(sp.sol.playableCards))
+	for moveIdx := range sp.sol.possibleMoves {
+		move := sp.sol.possibleMoves[moveIdx]
+		fmt.Println(disp.move(move))
+	}
 }
