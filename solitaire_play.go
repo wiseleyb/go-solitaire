@@ -94,9 +94,10 @@ func (sp SolitairePlay) findMoves(sc SolitaireCard) []SolitaireMove {
 		tab := sp.sol.tableaus[tabIdx]
 		//   showDeck.shownCard.nil && card.king
 		if len(tab.shownDeck.cards) == 0 && sc.card.isKing() {
-			res = append(res, newSolitaireMove(sp.sol, sc, nullSolitaireCard(sp.sol, "tableau", tabIdx)))
+      nsc := nullSolitaireCard(sp.sol, "tableau", tabIdx)
+      nsm := newSolitaireMove(sp.sol, sc, nsc) 
+			res = append(res, nsm)
 		}
-		//   shownDeck.shownCard(val, suit) = card.val + 1 and card.suit.color <> card.color
 		for cardIdx := range tab.shownDeck.cards {
 			c := tab.shownDeck.cards[cardIdx]
 			if c.notEqualTo(sc.card) &&
@@ -124,8 +125,10 @@ func (sp SolitairePlay) displayPossibleMoves() {
 	disp := newDisplay()
 	fmt.Println("")
 	fmt.Println("Playable Cards", disp.solitaire_cards(sp.sol.playableCards))
+	fmt.Println("")
 	for moveIdx := range sp.sol.possibleMoves {
 		move := sp.sol.possibleMoves[moveIdx]
 		fmt.Println(disp.move(move))
 	}
+	fmt.Println("")
 }

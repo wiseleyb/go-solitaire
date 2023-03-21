@@ -31,8 +31,6 @@ func (sm *SolitaireMove) play() {
 		sm.sol.tableaus[sm.ontoCard.deckIdx].shownDeck.cards =
 			append(sm.sol.tableaus[sm.ontoCard.deckIdx].shownDeck.cards, card)
 	}
-	disp.suitsBorderP()
-	sm.sol.display()
 }
 
 // TODO: remove card from relevant stack

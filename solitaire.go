@@ -19,7 +19,6 @@ type Solitaire struct {
 func newSolitaire() Solitaire {
 	sol := Solitaire{}
 	sol.restart()
-	sol.display()
 	return sol
 }
 
@@ -84,7 +83,10 @@ func (sol *Solitaire) display() {
 	}
 
 	fmt.Println("")
-	fmt.Println("Stock", disp.card(sol.stock.current()), "Stock Deck", disp.deck(sol.stock.deck))
+	fmt.Println("Stock", 
+              disp.card(sol.stock.current()), 
+              "Stock Deck", 
+              disp.deck(sol.stock.deck))
 
 	fmt.Println("")
 	fmt.Println("")
